@@ -9,4 +9,7 @@ const base = normalizeBase(process.env.VITE_BASE_URL || process.env.BASE_URL || 
 
 module.exports = {
   base,
+  build: {
+    assetsDir: 'assets',
+  },
 };

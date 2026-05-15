@@ -48,8 +48,8 @@ const slugify = (text) => {
 const goToRadioShow = (radioShow) => {
   const slug = slugify(radioShow.title);
   router.push({
-    name: 'radioShowSlug',
-    params: { slug, id: radioShow.id }
+    name: 'radioShow',
+    params: { slugAndId: `${slug}-${radioShow.id}` }
   });
 };
 

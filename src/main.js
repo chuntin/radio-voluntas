@@ -27,27 +27,32 @@ const getRadioShowTitle = (id) => {
   return show ? show.title : '';
 };
 
-const getRadioShowSlug = (id) => {
-  const show = Radio.getRadioShowById(parseInt(id));
-  return show ? slugify(show.title) : '';
+const getRadioShowIdFromParam = (slugAndId) => {
+  if (!slugAndId) return null;
+
+  const plainIdMatch = String(slugAndId).match(/^\d+$/);
+  if (plainIdMatch) return plainIdMatch[0];
+
+  const slugIdMatch = String(slugAndId).match(/-(\d+)$/);
+  if (slugIdMatch) return slugIdMatch[1];
+
+  return null;
 };
 
 const routes = [
   { name: 'home', path: '/', component: TheHome, meta: { title: 'Voluntas Radio' } },
   { name: 'magazines', path: '/revistas', component: TheMagazines, meta: { title: 'Revistas - Voluntas' } },
-  { name: 'radioShows', path: '/radiovoluntas', component: TheRadioShowList, meta: { title: 'Radio - Voluntas' } },
   {
-    name: 'radioShow',
-    path: '/radiovoluntas/:id',
-    component: RadioShowComponent,
-    props: true,
-    meta: { title: 'Programa - Voluntas' }
+    name: 'radioShows',
+    path: '/radio',
+    component: TheRadioShowList,
+    meta: { title: 'Radio - Voluntas' }
   },
   {
-    name: 'radioShowSlug',
-    path: '/radio/:slug-:id',
+    name: 'radioShow',
+    path: '/radio/:slugAndId',
     component: RadioShowComponent,
-    props: (route) => ({ id: route.params.id }),
+    props: (route) => ({ id: getRadioShowIdFromParam(route.params.slugAndId) }),
     meta: { title: 'Programa - Voluntas' }
   },
 ]
@@ -60,8 +65,9 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   let title = to.meta.title || 'Voluntas Radio';
   
-  if ((to.name === 'radioShow' || to.name === 'radioShowSlug') && to.params.id) {
-    const showTitle = getRadioShowTitle(to.params.id);
+  if (to.name === 'radioShow') {
+    const radioShowId = getRadioShowIdFromParam(to.params.slugAndId);
+    const showTitle = getRadioShowTitle(radioShowId);
     if (showTitle) {
       title = `${showTitle} - Voluntas Radio`;
     }
@@ -77,3 +83,13 @@ app.config.globalProperties.$image = useImage;
 app.use(router)
 
 app.mount('#app')
+
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`, {
+      scope: import.meta.env.BASE_URL,
+    }).catch((error) => {
+      console.error('Error registrando el service worker', error);
+    });
+  });
+}

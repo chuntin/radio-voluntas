@@ -2,12 +2,18 @@
   <div>
     <div class="menu" :class="{active: menuState}">
       <ul>
-        <li><router-link :to="{ name: 'magazines' }" class="link">Revistas</router-link></li>
-        <li><router-link :to="{ name: 'radioShows' }" class="link">Radio</router-link></li>
+        <li><router-link :to="{ name: 'magazines' }" class="link" @click="closeMenu">Revistas</router-link></li>
+        <li><router-link :to="{ name: 'radioShows' }" class="link" @click="closeMenu">Radio</router-link></li>
       </ul>
     </div>
     <div class="container">
       <the-header :menu-open="menuState" @toggle-menu="toggleMenu" />
+      <install-prompt
+        v-if="installPromptMode"
+        :mode="installPromptMode"
+        @install="installApp"
+        @dismiss="dismissInstallBanner(installPromptMode)"
+      />
       <div id="content" class="content background">
         <router-view v-slot="{ Component, route }">
           <transition name="fade">
@@ -15,8 +21,8 @@
           </transition>
         </router-view>
       </div>
-      <div class="footer">
-        <div class="social" v-if="!isPlaying">
+        <div class="footer">
+          <div class="social" v-if="showRandomPlayButton">
           <div class="play-session pulse" @click="playRandom">
             <i class="fa fa-play"></i>
           </div>
@@ -28,16 +34,51 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onUnmounted } from 'vue';
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue';
+import { useRoute } from 'vue-router';
+import InstallPrompt     from './components/InstallPrompt.vue';
 import TheHeader         from './components/TheHeader.vue';
 import PlayerVoluntas     from './components/PlayerVoluntas.vue';
 import { Radio }          from './services/radio';
 
+const INSTALL_BANNER_DISMISSED_KEY = 'voluntas-install-banner-dismissed';
+const IOS_INSTALL_BANNER_DISMISSED_KEY = 'voluntas-ios-install-banner-dismissed';
+
 const menuState = ref(false);
 const isPlaying = ref(false);
+const isPlayerVisible = ref(false);
+const deferredInstallPrompt = ref(null);
+const isInstalled = ref(false);
+const canInstall = ref(false);
+const isIosInstallAvailable = ref(false);
+const installBannerDismissed = ref(false);
+const iosInstallBannerDismissed = ref(false);
+const route = useRoute();
+
+const showRandomPlayButton = computed(() => {
+  return route.name === 'home' && !isPlaying.value && !isPlayerVisible.value;
+});
+
+const showInstallBanner = computed(() => {
+  return canInstall.value && !isInstalled.value && !installBannerDismissed.value;
+});
+
+const showIosInstallBanner = computed(() => {
+  return isIosInstallAvailable.value && !isInstalled.value && !iosInstallBannerDismissed.value;
+});
+
+const installPromptMode = computed(() => {
+  if (showInstallBanner.value) return 'install';
+  if (showIosInstallBanner.value) return 'ios';
+  return null;
+});
 
 function toggleMenu() {
   menuState.value = !menuState.value;
+}
+
+function closeMenu() {
+  menuState.value = false;
 }
 
 const playRandom = () => {
@@ -64,12 +105,77 @@ const handlePlayState = (event) => {
   isPlaying.value = event.detail;
 };
 
+const handlePlayerVisibility = (event) => {
+  isPlayerVisible.value = Boolean(event.detail);
+};
+
+const isStandaloneMode = () => {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+};
+
+const isIosDevice = () => {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+};
+
+const handleBeforeInstallPrompt = (event) => {
+  event.preventDefault();
+  deferredInstallPrompt.value = event;
+  canInstall.value = true;
+};
+
+const handleAppInstalled = () => {
+  isInstalled.value = true;
+  canInstall.value = false;
+  isIosInstallAvailable.value = false;
+  deferredInstallPrompt.value = null;
+};
+
+const dismissInstallBanner = (type = 'install') => {
+  if (type === 'ios') {
+    iosInstallBannerDismissed.value = true;
+    window.localStorage.setItem(IOS_INSTALL_BANNER_DISMISSED_KEY, 'true');
+    return;
+  }
+
+  installBannerDismissed.value = true;
+  window.localStorage.setItem(INSTALL_BANNER_DISMISSED_KEY, 'true');
+};
+
+const installApp = async () => {
+  if (!deferredInstallPrompt.value) return;
+
+  deferredInstallPrompt.value.prompt();
+  const choiceResult = await deferredInstallPrompt.value.userChoice;
+
+  if (choiceResult.outcome !== 'accepted') {
+    installBannerDismissed.value = false;
+  }
+
+  deferredInstallPrompt.value = null;
+  canInstall.value = false;
+};
+
+watch(() => route.fullPath, () => {
+  closeMenu();
+});
+
 onMounted(() => {
+  isInstalled.value = isStandaloneMode();
+  installBannerDismissed.value = window.localStorage.getItem(INSTALL_BANNER_DISMISSED_KEY) === 'true';
+  iosInstallBannerDismissed.value = window.localStorage.getItem(IOS_INSTALL_BANNER_DISMISSED_KEY) === 'true';
+  isIosInstallAvailable.value = isIosDevice() && !isInstalled.value;
+
   window.addEventListener('play-state', handlePlayState);
+  window.addEventListener('player-visibility-state', handlePlayerVisibility);
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  window.addEventListener('appinstalled', handleAppInstalled);
 });
 
 onUnmounted(() => {
   window.removeEventListener('play-state', handlePlayState);
+  window.removeEventListener('player-visibility-state', handlePlayerVisibility);
+  window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+  window.removeEventListener('appinstalled', handleAppInstalled);
 });
 
 </script>

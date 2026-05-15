@@ -18,6 +18,8 @@ watch(isPlaying, (newVal) => {
 });
 
 watch(isVisible, (newVal) => {
+  window.dispatchEvent(new CustomEvent('player-visibility-state', { detail: newVal }));
+
   if (!newVal) {
     isPlaying.value = false;
     window.dispatchEvent(new CustomEvent('play-state', { detail: false }));
@@ -165,6 +167,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('play-radio', handlePlayRadio);
+  window.dispatchEvent(new CustomEvent('player-visibility-state', { detail: false }));
 });
 </script>
 

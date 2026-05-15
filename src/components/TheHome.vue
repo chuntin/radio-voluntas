@@ -1,7 +1,7 @@
 <template>
   <div class="radio-web">
     <div class="radio" style="position: relative;">
-      <a class="link" href @click.prevent="$router.push('/radiovoluntas')"></a>
+      <a class="link" href @click.prevent="$router.push({ name: 'radioShows' })"></a>
       <div class="img-radio">
         <img :src="radioImageMain" alt="" style="max-width: 100%;">
       </div>
@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="web" style="position: relative;">
-      <a class="link" @click.prevent="$router.push('/revistas')"></a>
+      <a class="link" @click.prevent="$router.push({ name: 'magazines' })"></a>
       <div class="img-web">
         <img :src="imageCover" :alt="lastMagazine?.title" style="max-width: 100%;">
       </div>

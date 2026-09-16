@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "cp src/assets/db.json public/db.json && cp dist/index.html dist/404.html && cp editor-db.html dist/editor-db.html",
+    "postbuild": "node -e \"const fs=require('fs');const f='public/sw.js';const s=fs.readFileSync(f,'utf8');const m=s.match(/voluntas-radio-v(\\d+)/);const v=m?parseInt(m[1])+1:1;fs.writeFileSync(f,s.replace(/^const CACHE_NAME = .*/m,\\\"const CACHE_NAME = 'voluntas-radio-v\\\"+v+\\\"';\\\"));\" && cp src/assets/db.json public/db.json && cp dist/index.html dist/404.html && cp editor-db.html dist/editor-db.html",
     "predeploy": "npm run build",
     "deploy": "npm run build && gh-pages -d dist --dotfiles"
   },

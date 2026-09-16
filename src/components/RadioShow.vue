@@ -240,9 +240,10 @@ const getIvooxDownloadUrl = (show) => {
   display: inline-block;
   font-size: 1.5em;
   margin: 0 .2em 0 0;
-  &.closed {
-    transform: rotate(-90deg);
-  }
+}
+
+.arrow.closed {
+  transform: rotate(-90deg);
 }
 
 .btn-play {

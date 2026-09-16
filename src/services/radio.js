@@ -36,14 +36,15 @@ class Radio {
   }
 
   static getRadioShows() {
+    const now = new Date();
     return db.radioShows.map(radioShow => {
       const relatedShows = db.shows
         .filter(show => show.radio_show_id === radioShow.id)
+        .filter(show => !show.date_show || new Date(show.date_show) <= now)
         .map(show => ({
           ...show,
           songs: db.songs.filter(song => song.show_id === show.id),
           radioShow: radioShow,
-
         }))
         .sort((a, b) => new Date(b.date_show) - new Date(a.date_show));
 
@@ -57,11 +58,13 @@ class Radio {
   }
 
   static getRadioShowById(id) {
+    const now = new Date();
     const radioShow = db.radioShows.find(show => show.id === id);
     if (!radioShow) return null;
 
     const relatedShows = db.shows
       .filter(show => show.radio_show_id === radioShow.id)
+      .filter(show => !show.date_show || new Date(show.date_show) <= now)
       .map(show => ({
         ...show,
         songs: db.songs.filter(song => song.show_id === show.id),

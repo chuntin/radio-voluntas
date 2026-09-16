@@ -14,6 +14,7 @@ class Radio {
     const createdAtDate = new Date(show.date_show);
     const now = new Date();
     const timeMsDifference = now - createdAtDate;
+    if (timeMsDifference < 0) return false; // fecha futura, no mostrar como nuevo
     const timeDaysDifference = timeMsDifference / (1000 * 60 * 60 * 24);
     return timeDaysDifference < DAYS_TO_CONSIDER_NEW_SHOW;
   }

@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "postbuild": "cp dist/index.html dist/404.html && cp editor-db.html dist/editor-db.html",
+    "postbuild": "cp src/assets/db.json public/db.json && cp dist/index.html dist/404.html && cp editor-db.html dist/editor-db.html",
     "predeploy": "npm run build",
     "deploy": "npm run build && gh-pages -d dist --dotfiles"
   },

@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor de DB - Voluntas Radio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+
+        .panel {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .panel h3 {
+            font-size: 16px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="datetime-local"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="datetime-local"]:focus,
+        input[type="url"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #aaa;
+        }
+
+        .list-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .list-item:hover {
+            background: #3a3a3a;
+            border-left-color: #764ba2;
+        }
+
+        .list-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .list-item.drag-over {
+            background: #3d5a80;
+            border-left-color: #90ee90;
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #fff;
+            flex: 1;
+        }
+
+        .item-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .item-controls button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .list-scroll {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #444;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .code-output {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            margin-top: 15px;
+        }
+
+        .code-output pre {
+            margin: 0;
+            color: #90ee90;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .status-message {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-message.success {
+            display: block;
+            background: #10b981;
+            color: white;
+        }
+
+        .status-message.error {
+            display: block;
+            background: #ef4444;
+            color: white;
+        }
+
+        .drag-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tag-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            min-height: 40px;
+        }
+
+        .tag {
+            background: #667eea;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .tag-input input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: #fff;
+            min-width: 100px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .export-panel {
+            grid-column: 1 / -1;
+        }
+
+        .json-preview {
+            background: #1a1a1a;
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .song-order {
+            background: #333;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .song-order-number {
+            background: #667eea;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .song-order-title {
+            flex: 1;
+        }
+
+        .song-order-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .song-order-controls button {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #444;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: #999;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .success-icon {
+            display: inline-block;
+            color: #10b981;
+            margin-right: 8px;
+        }
+
+        .error-icon {
+            display: inline-block;
+            color: #ef4444;
+            margin-right: 8px;
+        }
+
+        .breadcrumb {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .breadcrumb span {
+            margin: 0 5px;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📻 Editor de Base de Datos - Voluntas Radio</h1>
+            <p>Crea y gestiona shows, episodios y canciones. Reordena canciones y episodios.</p>
+            <div class="controls">
+                <button onclick="loadJSONFile()">📂 Cargar JSON</button>
+                <button class="btn-success" onclick="downloadDB()">⬇️ Descargar JSON</button>
+                <button class="btn-warning" onclick="copyToClipboard()">📋 Copiar al Portapapeles</button>
+            </div>
+        </header>
+
+        <div id="statusMessage" class="status-message"></div>
+
+        <div class="main-content">
+            <!-- Panel: Shows -->
+            <div class="panel">
+                <h2>📺 Episodios (Shows)</h2>
+
+                <div class="form-group">
+                    <label>Selecciona un Programa</label>
+                    <select id="radioShowSelect" onchange="loadShowsForRadioShow()">
+                        <option value="">-- Selecciona un programa --</option>
+                    </select>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab(event, 'shows-view')">Listado</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'shows-form')">Crear Episodio</button>
+                </div>
+
+                <div id="shows-view" class="tab-content active">
+                    <div class="list-scroll" id="showsList"></div>
+                </div>
+
+                <div id="shows-form" class="tab-content">
+                    <form onsubmit="addShow(event)">
+                        <div class="form-group">
+                            <label>Título del Episodio</label>
+                            <input type="text" id="newShowTitle" placeholder="Ej: 1x01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha y Hora del Episodio</label>
+                            <input type="datetime-local" id="newShowDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>URL del Audio</label>
+                            <input type="url" id="newShowUrl" placeholder="https://..." required>
+                        </div>
+                        <button type="submit" class="btn-success">✅ Crear Episodio</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de edición de canciones -->
+        <div class="panel">
+            <h2>🎵 Canciones del Episodio</h2>
+
+            <div id="noShowSelected" class="empty-state">
+                <p>Selecciona un programa y un episodio para ver sus canciones</p>
+            </div>
+
+            <div id="showSongsContent" style="display: none;">
+                <div class="breadcrumb" id="songsBreadcrumb"></div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab(event, 'songs-view')">Canciones</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'songs-form')">Añadir Canción</button>
+                </div>
+
+                <div id="songs-view" class="tab-content active">
+                    <div id="songsList" class="list-scroll"></div>
+                </div>
+
+                <div id="songs-form" class="tab-content">
+                    <form onsubmit="addSongs(event)">
+                        <div class="form-group">
+                            <label>Canciones (una por línea)</label>
+                            <textarea id="newSongsText" placeholder="Pega aquí tus canciones, una por línea:&#10;The Beatles - Hey Jude&#10;Pink Floyd - Comfortably Numb&#10;Led Zeppelin - Stairway to Heaven" required></textarea>
+                        </div>
+                        <button type="submit" class="btn-success">✅ Añadir Canciones</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de exportación -->
+        <div class="panel export-panel">
+            <h2>💾 Exportar Base de Datos</h2>
+            <div class="controls">
+                <button class="btn-success" onclick="downloadDB()">⬇️ Descargar JSON</button>
+                <button class="btn-warning" onclick="copyToClipboard()">📋 Copiar al Portapapeles</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input file oculto para cargar JSON -->
+    <input type="file" id="fileInput" style="display: none;" accept=".json" onchange="handleFileUpload(event)">
+
+    <!-- Modal para editar episodio -->
+    <div id="editShowModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Episodio</h2>
+                <button class="close-btn" onclick="closeEditShowModal()">&times;</button>
+            </div>
+            <form onsubmit="saveEditShow(event)">
+                <div class="form-group">
+                    <label>Título del Episodio</label>
+                    <input type="text" id="editShowTitle" placeholder="Ej: 1x01" required>
+                </div>
+                <div class="form-group">
+                    <label>Fecha y Hora del Episodio</label>
+                    <input type="datetime-local" id="editShowDate" required>
+                </div>
+                <div class="form-group">
+                    <label>URL del Audio</label>
+                    <input type="url" id="editShowUrl" placeholder="https://..." required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeEditShowModal()">Cancelar</button>
+                    <button type="submit" class="btn-success">✅ Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para editar canción -->
+    <div id="editSongModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Editar Canción</h2>
+                <button class="close-btn" onclick="closeEditSongModal()">&times;</button>
+            </div>
+            <form onsubmit="saveEditSong(event)">
+                <div class="form-group">
+                    <label>Título de la Canción</label>
+                    <input type="text" id="editSongTitle" placeholder="Artista - Canción" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeEditSongModal()">Cancelar</button>
+                    <button type="submit" class="btn-success">✅ Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let dbData = {
+            radioShows: [],
+            shows: [],
+            songs: []
+        };
+
+        let selectedRadioShowId = null;
+        let selectedShowId = null;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intentar cargar JSON de ejemplo
+            loadDefaultDB();
+        });
+
+        // Cargar archivo JSON
+        function loadJSONFile() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    dbData = JSON.parse(e.target.result);
+                    showStatus('JSON cargado correctamente ✅', 'success');
+                    renderAll();
+                } catch (error) {
+                    showStatus('Error al parsear JSON: ' + error.message, 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Cargar JSON por defecto. Primero intenta el archivo publicado junto al editor.
+        async function loadDefaultDB() {
+            const candidates = ['./db.json', 'src/assets/db.json'];
+
+            for (const path of candidates) {
+                try {
+                    const res = await fetch(path, { cache: 'no-store' });
+                    if (!res.ok) {
+                        continue;
+                    }
+
+                    dbData = await res.json();
+                    renderAll();
+                    showStatus('Base de datos cargada ✅', 'success');
+                    return;
+                } catch (error) {
+                    console.warn('No se pudo cargar', path, error);
+                }
+            }
+
+            dbData = {
+                radioShows: [],
+                shows: [],
+                songs: []
+            };
+            renderAll();
+            showStatus('No se encontro db.json. Cargalo manualmente con "Cargar JSON".', 'error');
+        }
+
+        // Renderizar todo
+        function renderAll() {
+            updateRadioShowSelect();
+            updateJSONPreview();
+        }
+
+
+        // Seleccionar un Radio Show
+        function selectRadioShow(id) {
+            selectedRadioShowId = id;
+            document.getElementById('radioShowSelect').value = id;
+            loadShowsForRadioShow();
+        }
+
+        // Actualizar opciones de Radio Shows
+        function updateRadioShowSelect() {
+            const select = document.getElementById('radioShowSelect');
+            const currentValue = select.value;
+
+            const sorted = [...dbData.radioShows].sort((a, b) =>
+                a.title.localeCompare(b.title, 'es', { sensitivity: 'base' })
+            );
+
+            select.innerHTML = '<option value="">-- Selecciona un programa --</option>' +
+                sorted.map(show =>
+                    `<option value="${show.id}">${show.title}</option>`
+                ).join('');
+
+            if (currentValue) {
+                select.value = currentValue;
+            }
+        }
+
+        // Cargar shows para un radio show
+        function loadShowsForRadioShow() {
+            selectedRadioShowId = parseInt(document.getElementById('radioShowSelect').value) || null;
+            selectedShowId = null;
+            renderShows();
+            clearSongsList();
+        }
+
+        // Renderizar shows
+        function renderShows() {
+            const list = document.getElementById('showsList');
+
+            if (!selectedRadioShowId) {
+                list.innerHTML = '<div class="empty-state"><p>Selecciona un programa primero</p></div>';
+                return;
+            }
+
+            const filteredShows = dbData.shows.filter(s => s.radio_show_id === selectedRadioShowId);
+
+            if (filteredShows.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No hay episodios disponibles.</p></div>';
+                return;
+            }
+
+            list.innerHTML = filteredShows.map((show, index) => `
+                <div class="song-order" draggable="true" ondragstart="dragStartShow(event, ${show.id})" ondragover="dragOver(event)" ondrop="dragDropShow(event, ${show.id})" ondragend="dragEnd(event)">
+                    <div class="song-order-number">${index + 1}</div>
+                    <div class="song-order-title">${show.title} - ${show.date_show.split(' ')[0]}</div>
+                    <div class="song-order-controls">
+                        <button class="btn-warning" onclick="moveShow(${show.id}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+                        <button class="btn-warning" onclick="moveShow(${show.id}, 1)" ${index === filteredShows.length - 1 ? 'disabled' : ''}>⬇️</button>
+                        <button class="btn-warning" onclick="editShow(${show.id})">✏️ Editar</button>
+                        <button class="btn-warning" onclick="selectShow(${show.id})">🎵 Ver Canciones</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Seleccionar un show
+        function selectShow(id) {
+            selectedShowId = id;
+            renderSongs();
+        }
+
+        // Renderizar canciones
+        function renderSongs() {
+            if (!selectedShowId) {
+                clearSongsList();
+                return;
+            }
+
+            const show = dbData.shows.find(s => s.id === selectedShowId);
+            const radioShow = dbData.radioShows.find(rs => rs.id === show.radio_show_id);
+
+            document.getElementById('noShowSelected').style.display = 'none';
+            document.getElementById('showSongsContent').style.display = 'block';
+            document.getElementById('songsBreadcrumb').innerHTML =
+                `${radioShow.title} > ${show.title}`;
+
+            const songs = dbData.songs.filter(s => s.show_id === selectedShowId);
+            const list = document.getElementById('songsList');
+
+            if (songs.length === 0) {
+                list.innerHTML = '<div class="empty-state"><p>No hay canciones. Añade una nueva.</p></div>';
+                return;
+            }
+
+            list.innerHTML = songs.map((song, index) => `
+                <div class="song-order" draggable="true" ondragstart="dragStart(event, ${song.id})" ondragover="dragOver(event)" ondrop="dragDrop(event, ${song.id})" ondragend="dragEnd(event)">
+                    <div class="song-order-number">${index + 1}</div>
+                    <div class="song-order-title">${song.title}</div>
+                    <div class="song-order-controls">
+                        <button class="btn-warning" onclick="moveSong(${song.id}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
+                        <button class="btn-warning" onclick="moveSong(${song.id}, 1)" ${index === songs.length - 1 ? 'disabled' : ''}>⬇️</button>
+                        <button class="btn-warning" onclick="editSong(${song.id})">✏️ Editar</button>
+                        <button class="btn-danger" onclick="deleteSong(${song.id})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Funcionalidad Drag & Drop para Canciones
+        let draggedSongId = null;
+
+        function dragStart(event, songId) {
+            draggedSongId = songId;
+            event.target.classList.add('dragging');
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+            event.target.closest('.song-order')?.classList.add('drag-over');
+        }
+
+        function dragDrop(event, targetSongId) {
+            event.preventDefault();
+            event.target.closest('.song-order')?.classList.remove('drag-over');
+
+            if (draggedSongId && draggedSongId !== targetSongId) {
+                swapSongs(draggedSongId, targetSongId);
+            }
+        }
+
+        function dragEnd(event) {
+            event.target.closest('.song-order')?.classList.remove('dragging');
+            document.querySelectorAll('.song-order').forEach(el => el.classList.remove('drag-over'));
+        }
+
+        // Funcionalidad Drag & Drop para Shows/Episodios
+        let draggedShowId = null;
+
+        function dragStartShow(event, showId) {
+            draggedShowId = showId;
+            event.target.classList.add('dragging');
+        }
+
+        function dragDropShow(event, targetShowId) {
+            event.preventDefault();
+            event.target.closest('.song-order')?.classList.remove('drag-over');
+
+            if (draggedShowId && draggedShowId !== targetShowId) {
+                swapShows(draggedShowId, targetShowId);
+            }
+        }
+
+        function swapSongs(songId1, songId2) {
+            const songs = dbData.songs.filter(s => s.show_id === selectedShowId);
+            const index1 = songs.findIndex(s => s.id === songId1);
+            const index2 = songs.findIndex(s => s.id === songId2);
+
+            if (index1 !== -1 && index2 !== -1) {
+                // Obtener los índices globales en el array de songs
+                const globalIndex1 = dbData.songs.indexOf(songs[index1]);
+                const globalIndex2 = dbData.songs.indexOf(songs[index2]);
+
+                // Intercambiar
+                [dbData.songs[globalIndex1], dbData.songs[globalIndex2]] =
+                [dbData.songs[globalIndex2], dbData.songs[globalIndex1]];
+
+                renderSongs();
+                updateJSONPreview();
+                showStatus('Orden de canciones actualizado ✅', 'success');
+            }
+        }
+
+        function swapShows(showId1, showId2) {
+            const shows = dbData.shows.filter(s => s.radio_show_id === selectedRadioShowId);
+            const index1 = shows.findIndex(s => s.id === showId1);
+            const index2 = shows.findIndex(s => s.id === showId2);
+
+            if (index1 !== -1 && index2 !== -1) {
+                // Obtener los índices globales en el array de shows
+                const globalIndex1 = dbData.shows.indexOf(shows[index1]);
+                const globalIndex2 = dbData.shows.indexOf(shows[index2]);
+
+                // Intercambiar
+                [dbData.shows[globalIndex1], dbData.shows[globalIndex2]] =
+                [dbData.shows[globalIndex2], dbData.shows[globalIndex1]];
+
+                renderShows();
+                updateJSONPreview();
+                showStatus('Orden de episodios actualizado ✅', 'success');
+            }
+        }
+
+        function moveSong(songId, direction) {
+            const songs = dbData.songs.filter(s => s.show_id === selectedShowId);
+            const index = songs.findIndex(s => s.id === songId);
+
+            if ((direction === -1 && index > 0) || (direction === 1 && index < songs.length - 1)) {
+                const nextIndex = index + direction;
+                swapSongs(songId, songs[nextIndex].id);
+            }
+        }
+
+        function moveShow(showId, direction) {
+            const shows = dbData.shows.filter(s => s.radio_show_id === selectedRadioShowId);
+            const index = shows.findIndex(s => s.id === showId);
+
+            if ((direction === -1 && index > 0) || (direction === 1 && index < shows.length - 1)) {
+                const nextIndex = index + direction;
+                swapShows(showId, shows[nextIndex].id);
+            }
+        }
+
+        // Editar Show
+        let editingShowId = null;
+
+        function editShow(showId) {
+            const show = dbData.shows.find(s => s.id === showId);
+            if (!show) return;
+
+            editingShowId = showId;
+
+            // Convertir date_show (YYYY-MM-DD HH:mm:ss) a formato datetime-local (YYYY-MM-DDTHH:mm)
+            const dateTimeParts = show.date_show.split(' ');
+            const date = dateTimeParts[0];
+            const time = dateTimeParts[1] ? dateTimeParts[1].substring(0, 5) : '00:00';
+            const datetimeValue = date + 'T' + time;
+
+            document.getElementById('editShowTitle').value = show.title;
+            document.getElementById('editShowDate').value = datetimeValue;
+            document.getElementById('editShowUrl').value = show.url_sound;
+            document.getElementById('editShowModal').classList.add('active');
+        }
+
+        function closeEditShowModal() {
+            document.getElementById('editShowModal').classList.remove('active');
+            editingShowId = null;
+        }
+
+        function saveEditShow(event) {
+            event.preventDefault();
+
+            if (!editingShowId) return;
+
+            const show = dbData.shows.find(s => s.id === editingShowId);
+            if (!show) return;
+
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            // Convertir datetime-local a formato YYYY-MM-DD HH:mm:ss
+            const dateTimeValue = document.getElementById('editShowDate').value;
+            const dateShow = dateTimeValue.replace('T', ' ') + ':00';
+
+            let urlSound = document.getElementById('editShowUrl').value;
+            urlSound = convertIvooxUrl(urlSound);
+
+            show.title = document.getElementById('editShowTitle').value;
+            show.date_show = dateShow;
+            show.url_sound = urlSound;
+            show.modified_at = now;
+
+            closeEditShowModal();
+            renderShows();
+            updateJSONPreview();
+            showStatus('Episodio actualizado ✅', 'success');
+        }
+
+        // Limpiar lista de canciones
+        function clearSongsList() {
+            document.getElementById('noShowSelected').style.display = 'block';
+            document.getElementById('showSongsContent').style.display = 'none';
+        }
+
+
+        // Convertir URL de ivoox
+        function convertIvooxUrl(url) {
+            // Si ya termina en .m4a, no hacer nada
+            if (url.endsWith('.m4a')) {
+                return url;
+            }
+
+            // Si es una URL de ivoox del tipo https://go.ivoox.com/rf/[ID]
+            if (url.includes('ivoox.com/rf/')) {
+                const parts = url.split('/');
+                const id = parts[parts.length - 1]; // obtener el último segmento
+                return `http://www.ivoox.com/listen_mn_${id}.m4a`;
+            }
+
+            return url;
+        }
+
+        // Agregar Show
+        function addShow(event) {
+            event.preventDefault();
+
+            if (!selectedRadioShowId) {
+                showStatus('Selecciona un programa primero', 'error');
+                return;
+            }
+
+            const newId = Math.max(...dbData.shows.map(s => s.id), 0) + 1;
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            // Convertir datetime-local a formato YYYY-MM-DD HH:mm:ss
+            const dateTimeValue = document.getElementById('newShowDate').value;
+            const dateShow = dateTimeValue.replace('T', ' ') + ':00';
+
+            let urlSound = document.getElementById('newShowUrl').value;
+            urlSound = convertIvooxUrl(urlSound);
+
+            const newShow = {
+                id: newId,
+                radio_show_id: selectedRadioShowId,
+                created_at: now,
+                modified_at: now,
+                url_sound: urlSound,
+                date_show: dateShow,
+                title: document.getElementById('newShowTitle').value
+            };
+
+            dbData.shows.push(newShow);
+            event.target.reset();
+            renderShows();
+            updateJSONPreview();
+            showStatus('Episodio creado ✅', 'success');
+        }
+
+        // Agregar Canciones (múltiples)
+        function addSongs(event) {
+            event.preventDefault();
+
+            if (!selectedShowId) {
+                showStatus('Selecciona un episodio primero', 'error');
+                return;
+            }
+
+            const songsText = document.getElementById('newSongsText').value.trim();
+            if (!songsText) {
+                showStatus('Ingresa al menos una canción', 'error');
+                return;
+            }
+
+            const lines = songsText.split('\n').filter(line => line.trim() !== '');
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            let addedCount = 0;
+
+            lines.forEach(line => {
+                const title = line.trim();
+                if (title) {
+                    const newId = Math.max(...dbData.songs.map(s => s.id), 0) + 1;
+
+                    const newSong = {
+                        id: newId,
+                        title: title,
+                        band: null,
+                        created_at: now,
+                        modified_at: now,
+                        show_id: selectedShowId
+                    };
+
+                    dbData.songs.push(newSong);
+                    addedCount++;
+                }
+            });
+
+            event.target.reset();
+            renderSongs();
+            updateJSONPreview();
+            showStatus(`${addedCount} canción/es añadida/s ✅`, 'success');
+        }
+
+        // Eliminar Canción
+        function deleteSong(id) {
+            dbData.songs = dbData.songs.filter(s => s.id !== id);
+            renderSongs();
+            updateJSONPreview();
+            showStatus('Canción eliminada ✅', 'success');
+        }
+
+        // Editar Canción
+        let editingSongId = null;
+
+        function editSong(songId) {
+            const song = dbData.songs.find(s => s.id === songId);
+            if (!song) return;
+
+            editingSongId = songId;
+            document.getElementById('editSongTitle').value = song.title;
+            document.getElementById('editSongModal').classList.add('active');
+        }
+
+        function closeEditSongModal() {
+            document.getElementById('editSongModal').classList.remove('active');
+            editingSongId = null;
+        }
+
+        function saveEditSong(event) {
+            event.preventDefault();
+
+            if (!editingSongId) return;
+
+            const song = dbData.songs.find(s => s.id === editingSongId);
+            if (!song) return;
+
+            const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            song.title = document.getElementById('editSongTitle').value;
+            song.modified_at = now;
+
+            closeEditSongModal();
+            renderSongs();
+            updateJSONPreview();
+            showStatus('Canción actualizada ✅', 'success');
+        }
+
+        // Actualizar vista previa JSON
+        function updateJSONPreview() {
+            // Ya no se muestra en la interfaz
+        }
+
+        // Escapar HTML
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Copiar al portapapeles
+        function copyToClipboard() {
+            const json = JSON.stringify(dbData, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                showStatus('JSON copiado al portapapeles ✅', 'success');
+            }).catch(() => {
+                showStatus('Error al copiar', 'error');
+            });
+        }
+
+        // Descargar JSON
+        function downloadDB() {
+            const json = JSON.stringify(dbData, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'db.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showStatus('JSON descargado ✅', 'success');
+        }
+
+        // Mostrar mensajes de estado
+        function showStatus(message, type) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = `status-message ${type}`;
+            setTimeout(() => {
+                el.className = 'status-message';
+            }, 3000);
+        }
+
+        // Cambiar de tab
+        function switchTab(event, tabId) {
+            event.preventDefault();
+
+            const parent = event.target.closest('.panel');
+            const allTabs = parent.querySelectorAll('.tab-content');
+            const allButtons = parent.querySelectorAll('.tab-btn');
+
+            allTabs.forEach(tab => tab.classList.remove('active'));
+            allButtons.forEach(btn => btn.classList.remove('active'));
+
+            parent.querySelector(`#${tabId}`).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>

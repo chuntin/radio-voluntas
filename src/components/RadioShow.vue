@@ -98,7 +98,7 @@ const getIvooxDownloadUrl = (show) => {
       >
         <div class="radio-link">
           <div
-            class="flecha"
+            class="arrow"
             :class="{ 'closed': isSongListVisible(show.id) }"
             :data-show-id="show.id"
             @click="toggleSongList(show.id)"
@@ -234,7 +234,7 @@ const getIvooxDownloadUrl = (show) => {
   font-size: .9em;
 }
 
-.flecha {
+.arrow {
   cursor: pointer;
   transform: rotate(90deg);
   display: inline-block;

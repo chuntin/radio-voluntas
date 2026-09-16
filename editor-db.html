@@ -678,7 +678,8 @@
 
         // Cargar JSON por defecto. Primero intenta el archivo publicado junto al editor.
         async function loadDefaultDB() {
-            const candidates = ['./db.json', 'src/assets/db.json'];
+            const bust = '?t=' + Date.now();
+            const candidates = ['./db.json' + bust, 'src/assets/db.json' + bust];
 
             for (const path of candidates) {
                 try {

@@ -724,8 +724,12 @@
             const select = document.getElementById('radioShowSelect');
             const currentValue = select.value;
 
+            const sorted = [...dbData.radioShows].sort((a, b) =>
+                a.title.localeCompare(b.title, 'es', { sensitivity: 'base' })
+            );
+
             select.innerHTML = '<option value="">-- Selecciona un programa --</option>' +
-                dbData.radioShows.map(show =>
+                sorted.map(show =>
                     `<option value="${show.id}">${show.title}</option>`
                 ).join('');
 

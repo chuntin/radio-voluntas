@@ -1,4 +1,4 @@
-const CACHE_NAME = 'voluntas-radio-v6';
+const CACHE_NAME = 'voluntas-radio-v8';
 const APP_SHELL = [
   '.',
   'index.html',

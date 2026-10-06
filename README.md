@@ -40,3 +40,9 @@ Los archivos compilados se generan en la carpeta `dist/`.
 npm run deploy
 ```
 Este comando primero compila el proyecto y luego lo despliega en la rama `gh-pages`.
+
+## Gestión de `db.json`
+
+Para el flujo completo de edición, commit y despliegue del JSON, consulta:
+
+- [`TUTORIAL-DB-JSON.md`](./TUTORIAL-DB-JSON.md)

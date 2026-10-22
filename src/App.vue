@@ -750,7 +750,7 @@ $type: ease-in-out;
   position: fixed;
   text-align: center;
   bottom: 0;
-  background: #fff;
+  //background: #fff;
   //height: 60px;
   width: 100%;
 }

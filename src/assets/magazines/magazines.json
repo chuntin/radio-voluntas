@@ -559,5 +559,16 @@
     "cover": "v0.jpg",
     "active": 1,
     "url_view": "https://www.calameo.com/read/00162890755710040d848"
+  },
+  {
+    "id": "A",
+    "title": "Artur, la última respresentación",
+    "numberMagazine": "A",
+    "datePublish": "2026-11-01 09:00:00",
+    "created_at": "2026-11-01 00:00:00",
+    "updated_at": "2026-11-01 00:00:00",
+    "cover": "vArtur.jpg",
+    "active": true,
+    "urlView": "https://www.calameo.com/read/001628907863f3cc21c52"
   }
 ]

@@ -49,6 +49,7 @@ import cover_v47_jpg from '../assets/images2/magazines/cover/v47.jpg';
 import cover_v48_jpg from '../assets/images2/magazines/cover/v48.jpg';
 import cover_v49_jpg from '../assets/images2/magazines/cover/v49.jpg';
 import cover_v50_jpg from '../assets/images2/magazines/cover/v50.jpg';
+import cover_vArtur_jpg from '../assets/images2/magazines/cover/vArtur.jpg';
 
 const magazineCoverMap = {
   'v0.jpg': cover_v0_jpg,
@@ -102,6 +103,7 @@ const magazineCoverMap = {
   'v48.jpg': cover_v48_jpg,
   'v49.jpg': cover_v49_jpg,
   'v50.jpg': cover_v50_jpg,
+  'vArtur.jpg': cover_vArtur_jpg,
 };
 
 export const getMagazineCover = (cover) => magazineCoverMap[cover] || magazineCoverMap['v50.jpg'];

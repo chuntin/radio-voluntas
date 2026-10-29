@@ -576,26 +576,41 @@ const magazines = [
     'active': true,
     'urlView': 'https://es.calameo.com/read/00162890727adf827fd07',
   },
-    {
-      "id": 52,
-      "title": "Voluntas ZERO",
-      "numberMagazine": 0,
-      "datePublish": "2024-04-12 06:00:00",
-      "created_at": "2024-04-08 20:58:11",
-      "updated_at": "2024-04-08 20:58:14",
-      "cover": "v0.jpg",
-      "active": true,
-      "urlView": "https://www.calameo.com/read/00162890755710040d848"
-    }
+  {
+    "id": 52,
+    "title": "Voluntas ZERO",
+    "numberMagazine": 0,
+    "datePublish": "2024-04-12 06:00:00",
+    "created_at": "2024-04-08 20:58:11",
+    "updated_at": "2024-04-08 20:58:14",
+    "cover": "v0.jpg",
+    "active": true,
+    "urlView": "https://www.calameo.com/read/00162890755710040d848"
+  },
+  {
+    "id": 'A',
+    "title": "Artur, la última respresentación",
+    "numberMagazine": 'A',
+    "datePublish": "2026-11-01 09:00:00",
+    "created_at": "2026-11-01 00:00:00",
+    "updated_at": "2026-11-01 00:00:00",
+    "cover": "vArtur.jpg",
+    "active": true,
+    "urlView": "https://www.calameo.com/read/001628907863f3cc21c52"
+  }
 ];
 
 const magazineList = magazines
   .filter(({active}) => active === true)
+  .filter(({datePublish}) => new Date(datePublish) <= new Date())
   .sort((a, b) => {
-    // Coloca el número 0 al principio
+    // Set 'A' at the beginning
+    if (a.numberMagazine === 'A') return -1;
+    if (b.numberMagazine === 'A') return 1;
+    // Set number 0 at the beginning
     if (a.numberMagazine === 0) return -1;
     if (b.numberMagazine === 0) return 1;
-    // Para los demás números, orden descendente
+    // Others Descending order
     return b.numberMagazine - a.numberMagazine;
   });
 </script>
